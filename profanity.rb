@@ -24,7 +24,7 @@
 
 =end
 
-$version = 0.6
+$version = 0.7
 
 require 'thread'
 require 'socket'
@@ -456,7 +456,7 @@ class PercWindow < Curses::Window
 		# Shorten spell names
 		temp = text
 		temp = temp.sub(/^*.(roisaen|roisan)/, "")
-		temp = temp.sub(/^*.(Indefinite)/, "(Ind")
+		temp = temp.sub(/^*.(Indefinite)/, "(cyclic")
 
 		spell_name = temp[0..temp.index("(")-2]
 
