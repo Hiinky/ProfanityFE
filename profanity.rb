@@ -24,12 +24,13 @@
 
 =end
 
-$version = 0.4
+$version = 0.6
 
 require 'thread'
 require 'socket'
 require 'rexml/document'
 require 'curses'
+require 'logger'
 include Curses
 
 Curses.init_screen
@@ -37,9 +38,452 @@ Curses.start_color
 Curses.cbreak
 Curses.noecho
 
+class Skill
+	def initialize(name, ranks, percent, mindstate)
+		@name = name
+		@ranks = ranks
+		@percent = percent
+		@mindstate = mindstate
+	end
+
+	def to_s
+		"%8s:%5d %2s%% [%2s/34]" % [@name, @ranks, @percent, @mindstate]
+	end
+
+	def to_str
+		"%8s:%5d %2s%% [%2s/34]" % [@name, @ranks, @percent, @mindstate]
+	end
+end
+
+class ExpWindow < Curses::Window
+	attr_reader :color_stack, :buffer
+	attr_accessor :scrollbar, :indent_word_wrap, :layout, :time_stamp, :logger
+	@@list = Array.new
+
+	def ExpWindow.list
+		@@list
+	end
+
+	def initialize(*args)
+		@skills = Hash.new
+		@open = false
+		@@list.push(self)
+		super(*args)
+	end
+
+	def delete_skill
+		if @current_skill
+      @skills.delete(@current_skill)
+      redraw
+      @current_skill = ""
+		end
+	end
+
+	def set_current(skill)
+	 #  if skill.include? "HT" 
+		# 	skill = name.sub(/^HT/, "").prepend("H-Thrown")
+		# elsif skill.include? "LT"
+		# 	skill = name.sub(/^LT/, "").prepend("Thrown-L")
+		# elsif skill.include? "Lt Armor"
+		# 	skill = name.sub(/^Lt Armor/, "").prepend("Armor-L")
+		# end
+
+		@current_skill = skill
+	end
+
+	def add_string(text, line_colors)
+		if text =~ /(.+):\s*(\d+) (\d+)\%  \[\s*(\d+)\/34\]/
+			name = $1.strip
+			ranks = $2
+			percent = $3
+			mindstate = $4
+      
+   #    if name.include? "HT" 
+			# 	name = name.sub(/^HT/, "").prepend("H-Thrown")
+			# elsif name.include? "LT"
+			# 	name = name.sub(/^LT/, "").prepend("Thrown-L")
+			# elsif name.include? "Lt Armor"
+			# 	name = name.sub(/^Lt Armor/, "").prepend("Armor-L")
+			# end
+      
+			skill = Skill.new(name, ranks, percent, mindstate)
+			@skills[@current_skill] = skill
+			redraw
+			@current_skill = ""
+		end
+	end
+
+	def redraw
+		clear
+    setpos(0,0)
+		@skills.sort.each do |name, skill|
+			addstr(skill)	
+			addstr("\n")
+		end
+		noutrefresh
+	end
+end
+
+class PercWindow < Curses::Window
+	attr_reader :color_stack, :buffer
+	attr_accessor :scrollbar, :indent_word_wrap, :layout, :time_stamp, :logger
+	@@list = Array.new
+  
+	def ExpWindow.list
+		@@list
+	end
+
+	def initialize(*args)
+		@@list.push(self)
+		super(*args)
+
+    @ALL_SPELLS = {
+			"Abandoned Heart" => "ABAN",
+			"Absolution" => "Absolution",
+			"Acid Splash" => "ACS",
+			"Aegis of Granite" => "AEG",
+			"Aesandry Darlaeth" => "AD",
+			"Aesrela Everild" => "AE",
+			"Aether Cloak" => "AC",
+			"Aether Wolves" => "AEWO",
+			"Aethrolysis" => "Aethrolysis",
+			"Avren Aevareae" => "AVA",
+			"Aggressive Stance" => "AGS",
+			"Air Bubble" => "AB",
+			"Air Lash" => "ALA",
+			"Alamhif's Gift" => "AG",
+			"Albreda's Balm" => "ALB",
+			"Anther's Call" => "ANC",
+			"Anti-Stun" => "AS",
+			"Arbiter's Stylus" => "ARS",
+			"Arc Light" => "AL",
+			"Artificer's Eye" => "ART",
+			"Aspects of the All-God" => "ALL",
+			"Aspirant's Aegis" => "AA",
+			"Athleticism" => "ATHLETICISM",
+			"Aura Sight" => "AUS",
+			"Aura of Tongues" => "AOT",
+			"Auspice" => "Auspice",
+			"Awaken" => "AWAKEN",
+			"Awaken Forest" => "AF",
+			"Banner of Truce" => "BOT",
+			"Bear Strength" => "BES",
+			"Beckon the Naga" => "BTN",
+			"Benediction" => "Benediction",
+			"Blend" => "Blend",
+			"Bless" => "Bless",
+			"Blessing of the Fae" => "BOTF",
+			"Blood Burst" => "BLB",
+			"Blood Staunching" => "BS",
+			"Blufmor Garaen" => "BG",
+			"Blur" => "Blur",
+			"Bond Armaments" => "BA",
+			"Braun's Conjecture" => "BC",
+			"Breath of Storms" => "BOS",
+			"Burden" => "BURDEN",
+			"Burn" => "Burn",
+			"Butcher's Eye" => "BUE",
+			"Cage of Light" => "CoL",
+			"Calcified Hide" => "CH",
+			"Call from Beyond" => "CFB",
+			"Calm" => "Calm",
+			"Caress of the Sun" => "CARE",
+			"Carrion Call" => "CAC",
+			"Centering" => "Centering",
+			"Chain Lightning" => "CL",
+			"Cheetah Swiftness" => "CS",
+			"Chill Spirit" => "CHS",
+			"Circle of Sympathy" => "COS",
+			"Clarity" => "Clarity",
+			"Claws of the Cougar" => "COTC",
+			"Clear Vision" => "CV",
+			"Compel" => "COMPEL",
+			"Compost" => "COMPOST",
+			"Consume Flesh" => "CF",
+			"Contingency" => "CONTINGENCY",
+			"Courage" => "CO",
+			"Crystal Dart" => "CRD",
+			"Crusader's Challenge" => "CRC",
+			"Cure Disease" => "CD",
+			"Curse of the Wilds" => "COTW",
+			"Curse of Zachriedek" => "COZ",
+			"Damaris' Lullaby" => "DALU",
+			"Dazzle" => "Dazzle",
+			"Deadfall" => "DF",
+			"Demrris' Resolve" => "DMRS",
+			"Desert's Maelstrom" => "DEMA",
+			"Destiny Cipher" => "DC",
+			"Devitalize" => "DEVI",
+			"Devolve" => "DE",
+			"Devour" => "Devour",
+			"Dispel" => "DISPEL",
+			"Distant Gaze" => "DG",
+			"Dinazen Olkar" => "DO",
+			"Divine Armor" => "DA",
+			"Divine Guidance" => "DIG",
+			"Divine Radiance" => "DR",
+			"Dragon's Breath" => "DB",
+			"Drums of the Snake" => "DRUM",
+			"Ease Burden" => "EASE",
+			"Eagle's Cry" => "EC",
+			"Earth Meld" => "EM",
+			"Echoes of Aether" => "ECHO",
+			"Eillie's Cry" => "ECRY",
+			"Elision" => "ELI",
+			"Electrostatic Eddy" => "EE",
+			"Enrichment" => "ENRICH",
+			"Essence of Yew" => "EY",
+			"Ethereal Fissure" => "ETF",
+			"Ethereal Shield" => "ES",
+			"Eye of Kertigen" => "EYE",
+			"Eyes of the Blind" => "EOTB",
+			"Eylhaar's Feast" => "EF",
+			"Faenella's Grace" => "FAE",
+			"Fire Ball" => "FB",
+			"Fire Rain" => "FR",
+			"Fire Shards" => "FS",
+			"Fire of Ushnish" => "FOU",
+			"Fists of Faenella" => "FF",
+			"Finesse" => "FIN",
+			"Fluoresce" => "Fluoresce",
+			"Flush Poisons" => "FP",
+			"Focus Moonbeam" => "FM",
+			"Footman's Strike" => "FST",
+			"Forestwalker's Boon" => "FWB",
+			"Fortress of Ice" => "FOI",
+			"Fountain of Creation" => "FOC",
+			"Frostbite" => "frostbite",
+			"Frost Scythe" => "FRS",
+			"Gauge Flow" => "GAF",
+			"Gar Zeng" => "GZ",
+			"Geyser" => "Geyser",
+			"Ghost Shroud" => "GHS",
+			"Gift of Life" => "GOL",
+			"Glythtide's Gift" => "GG",
+			"Glythtide's Joy" => "GJ",
+			"Grizzly Claws" => "GRIZ",
+			"Grounding Field" => "GF",
+			"Guardian Spirit" => "GS",
+			"Halo" => "HALO",
+			"Halt" => "Halt",
+			"Hand of Tenemlor" => "HOT",
+			"Hands of Justice" => "HOJ",
+			"Hands of Lirisa" => "HOL",
+			"Harawep's Bonds" => "HB",
+			"Harm Evil" => "HE",
+			"Harm Horde" => "HH",
+			"Harmony" => "Harmony",
+			"Heal" => "Heal",
+			"Heal Scars" => "HS",
+			"Heal Wounds" => "HW",
+			"Heart Link" => "HL",
+			"Heighten Pain" => "HP",
+			"Heroic Strength" => "HES",
+			"Hodierna's Lilt" => "HODI",
+			"Holy Warrior" => "HOW",
+			"Horn of the Black Unicorn" => "HORN",
+			"Huldah's Pall" => "HULP",
+			"Hydra Hex" => "HYH",
+			"Ice Patch" => "IP",
+			"Icutu Zaharenela" => "IZ",
+			"Idon's Theft" => "IT",
+			"Ignite" => "Ignite",
+			"Imbue" => "IMBUE",
+			"Innocence" => "INNOCENCE",
+			"Instinct" => "INST",
+			"Invocation of the Spheres" => "IOTS",
+			"Iron Constitution" => "IC",
+			"Ivory Mask" => "IVM",
+			"Kura-Silma" => "KS",
+			"Last Gift of Vithwok IV" => "LGV",
+			"Lay Ward" => "LW",
+			"Lethargy" => "LETHARGY",
+			"Lightning Bolt" => "LB",
+			"Locate" => "Locate",
+			"Machinist's Touch" => "MT",
+			"Magnetic Ballista" => "MAB",
+			"Major Physical Protection" => "MAPP",
+			"Malediction" => "Malediction",
+			"Manifest Force" => "MAF",
+			"Mantle of Flame" => "MOF",
+			"Mark of Arhat" => "MOA",
+			"Marshal Order" => "MO",
+			"Mask of the Moons" => "MOM",
+			"Mass Rejuvenation" => "MRE",
+			"Membrach's Greed" => "MEG",
+			"Memory of Nature" => "MON",
+			"Mental Blast" => "MB",
+			"Mental Focus" => "MEF",
+			"Meraud's Cry" => "MC",
+			"Mind Shout" => "MS",
+			"Minor Physical Protection" => "MPP",
+			"Misdirection" => "MIS",
+			"Moonblade" => "Moonblade",
+			"Moongate" => "MG",
+			"Murrula's Flames" => "MF",
+			"Naming of Tears" => "NAME",
+			"Necrotic Reconstruction" => "NR",
+			"Nexus" => "NEXUS",
+			"Nissa's Binding" => "NB",
+			"Nonchalance" => "NON",
+			"Noumena" => "NOU",
+			"Oath of the Firstborn" => "OATH",
+			"Obfuscation" => "Obfuscation",
+			"Osrel Meraud" => "OM",
+			"Paeldryth's Wrath" => "PW",
+			"Paralysis" => "PARALYSIS",
+			"Partial Displacement" => "PD",
+			"Perseverance of Peri'el" => "POP",
+			"Persistence of Mana" => "POM",
+			"Petrifying Visions" => "PV",
+			"Phelim's Sanction" => "PS",
+			"Philosopher's Preservation" => "PHP",
+			"Piercing Gaze" => "PG",
+			"Phoenix's Pyre" => "PYRE",
+			"Platinum Hands of Kertigen" => "PHK",
+			"Protection from Evil" => "PFE",
+			"Psychic Shield" => "PSY",
+			"Quicken the Earth" => "QE",
+			"Rage of the Clans" => "RAGE",
+			"Raise Power" => "RP",
+			"Read the Ripples" => "RtR",
+			"Rebuke" => "REB",
+			"Redeemer's Pride" => "REPR",
+			"Refractive Field" => "RF",
+			"Refresh" => "Refresh",
+			"Regalia" => "REGAL",
+			"Regenerate" => "Regenerate",
+			"Rejuvenation" => "REJUV",
+			"Rend" => "rend",
+			"Researcher's Insight" => "REI",
+			"Resonance" => "RESONANCE",
+			"Resurrection" => "REZZ",
+			"Revelation" => "Revelation",
+			"Reverse Putrefaction" => "RPU",
+			"Riftal Summons" => "RS",
+			"Righteous Wrath" => "RW",
+			"Rimefang" => "RIM",
+			"Ring of Spears" => "ROS",
+			"Rising Mists" => "RM",
+			"Rite of Contrition" => "ROC",
+			"Rite of Grace" => "ROG",
+			"Rutilor's Edge" => "RUE",
+			"Saesordian Compass" => "SCO",
+			"Sanctify Pattern" => "SAP",
+			"Sanctuary" => "SANCTUARY",
+			"Sanyu Lyba" => "SL",
+			"Seal Cambrinth" => "SEC",
+			"Seer's Sense" => "SEER",
+			"See the Wind" => "STW",
+			"Senses of the Tiger" => "SOTT",
+			"Sentinel's Resolve" => "SR",
+			"Sever Thread" => "SET",
+			"Shadewatch Mirror" => "SHM",
+			"Shadow Servant" => "SS",
+			"Shadowling" => "shadowling",
+			"Shadows" => "Shadows",
+			"Shatter" => "Shatter",
+			"Shear" => "shear",
+			"Shield of Light" => "SOL",
+			"Shift Moonbeam" => "SM",
+			"Shockwave" => "Shockwave",
+			"Siphon Vitality" => "SV",
+			"Skein of Shadows" => "SKS",
+			"Sleep" => "Sleep",
+			"Smite Horde" => "SMH",
+			"Soldier's Prayer" => "SP",
+			"Soul Ablaze" => "SOUL",
+			"Soul Attrition" => "SA",
+			"Soul Bonding" => "SB",
+			"Soul Shield" => "SOS",
+			"Soul Sickness" => "SICK",
+			"Sovereign Destiny" => "SOD",
+			"Spite of Dergati" => "SPIT",
+			"Stampede" => "STAMPEDE",
+			"Starcrash" => "Starcrash",
+			"Starlight Sphere" => "SLS",
+			"Stellar Collector" => "STC",
+			"Steps of Vuan" => "SOV",
+			"Stone Strike" => "STS",
+			"Strange Arrow" => "STRA",
+			"Stun Foe" => "SF",
+			"Substratum" => "Substratum",
+			"Sure Footing" => "SUF",
+			"Swarm" => "SWARM",
+			"Swirling Winds" => "SW",
+			"Syamelyo Kuniyo" => "SK",
+			"Tailwind" => "TW",
+			"Tangled Fate" => "TF",
+			"Telekinetic Storm" => "TKS",
+			"Telekinetic Throw" => "TKT",
+			"Teleport" => "TELEPORT",
+			"Tenebrous Sense" => "TS",
+			"Tezirah's Veil" => "TV",
+			"Thoughtcast" => "TH",
+			"Thunderclap" => "TC",
+			"Tingle" => "TI",
+			"Trabe Chalice" => "TRC",
+			"Tranquility" => "TRANQUILITY",
+			"Tremor" => "Tremor",
+			"Truffenyi's Rally" => "TR",
+			"Turmar Illumination" => "TU IL",
+			"Uncurse" => "UNCURSE",
+			"Universal Solvent" => "USOL",
+			"Unleash" => "Unleash",
+			"Veil of Ice" => "VOI",
+			"Vertigo" => "Vertigo",
+			"Vessel of Salvation" => "VOS",
+			"Vigil" => "VIGIL",
+			"Vigor" => "VIGOR",
+			"Viscous Solution" => "VS",
+			"Visions of Darkness" => "VOD",
+			"Vitality Healing" => "VH",
+			"Vivisection" => "Vivisection",
+			"Ward Break" => "WB",
+			"Whispers of the Muse" => "WOTM",
+			"Whole Displacement" => "WD",
+			"Will of Winter" => "WILL",
+			"Wisdom of the Pack" => "WOTP",
+			"Wolf Scent" => "WS",
+			"Words of the Wind" => "WORD",
+			"Worm's Mist" => "WORM",
+			"Y'ntrel Sechra" => "YS",
+			"Zephyr" => "zephyr"
+    }
+	end
+
+	def add_string(text, line_colors)
+		# Shorten spell names
+		temp = text
+		temp = temp.sub(/^*.(roisaen|roisan)/, "")
+		temp = temp.sub(/^*.(Indefinite)/, "(Ind")
+
+		spell_name = temp[0..temp.index("(")-2]
+
+		addstr(temp.sub(/^#{spell_name}/, @ALL_SPELLS[spell_name.strip]))
+		addstr("\n")
+		refresh
+	end
+
+	def clear_spells
+		clear
+		setpos(0, 0)
+	end
+
+	def redraw
+		clear
+		setpos(0, 0)
+
+		@spells.each do |spell|
+			addstr(spell)
+			addstr("\n")
+		end
+	end
+end
+
 class TextWindow < Curses::Window
 	attr_reader :color_stack, :buffer
-	attr_accessor :scrollbar, :indent_word_wrap, :layout
+	attr_accessor :scrollbar, :indent_word_wrap, :layout, :time_stamp, :logger
 	@@list = Array.new
 
 	def TextWindow.list
@@ -89,6 +533,10 @@ class TextWindow < Curses::Window
 		#
 		# word wrap string, split highlights if needed so each wrapped line is independent, update buffer, update window if needed
 		#
+		if @logger && string && !string.chomp.empty? && '>' != string
+			@logger.info string
+		end
+		string += " [#{Time.now.hour.to_s.rjust(2,'0')}:#{Time.now.min.to_s.rjust(2,'0')}]" if @time_stamp && string && !string.chomp.empty?
 		while (line = string.slice!(/^.{2,#{maxx-1}}(?=\s|$)/)) or (line = string.slice!(0,(maxx-1)))
 			line_colors = Array.new
 			for h in string_colors
@@ -225,7 +673,7 @@ class ProgressWindow < Curses::Window
 		@label = String.new
 		@fg = [ ]
 		@bg = [ '0000aa', '000055' ]
-		@value = 0
+		@value = 100
 		@max_value = 100
 		@@list.push(self)
 		super(*args)
@@ -413,6 +861,7 @@ key_action = Hash.new
 need_prompt = false
 prompt_text = ">"
 stream_handler = Hash.new
+exp_window = nil
 indicator_handler = Hash.new
 progress_handler = Hash.new
 countdown_handler = Hash.new
@@ -430,9 +879,10 @@ WINDOWS = Hash.new
 SCROLL_WINDOW = Array.new
 
 def add_prompt(window, prompt_text, cmd="")
-  window.add_string("#{prompt_text}#{cmd}", [ h={ :start => 0, :end => (prompt_text.length + cmd.length), :fg => '555555' } ])
+	window.add_string("#{prompt_text}#{cmd}", [ h={ :start => 0, :end => (prompt_text.length + cmd.length), :fg => '555555' } ])
 end
 
+LOG_DIR = '.'
 for arg in ARGV
 	if arg =~ /^\-\-help|^\-h|^\-\?/
 		puts ""
@@ -443,6 +893,8 @@ for arg in ARGV
 		puts "   --default-background-color-id=<id>"
 		puts "   --custom-colors=<on|off>"
 		puts "   --settings-file=<filename>"
+		puts "   --log-name=<name>"
+		puts "   --log-dir=<directory>"
 		puts ""
 		exit
 	elsif arg =~ /^\-\-port=([0-9]+)$/
@@ -456,8 +908,21 @@ for arg in ARGV
 		CUSTOM_COLORS = fix_setting[$1]
 	elsif arg =~ /^\-\-settings\-file=(.*?)$/
 		SETTINGS_FILENAME = $1
+	elsif arg =~ /^\-\-log\-name=(.*?)$/
+		LOG_FILENAME = $1
+	elsif arg =~ /^\-\-log\-dir=(.*?)$/
+		LOG_DIR = $1
 	end
 end
+
+file_name = "profanity#{LOG_FILENAME || PORT}-game.log"
+logger = Logger.new(File.join(LOG_DIR, file_name), 'daily')
+
+logger.formatter = proc do |_, datetime, _, msg|
+	"#{datetime}:#{msg}\n"
+end
+
+logger.sev_threshold = Logger::INFO
 
 def log(value)
 		File.open('profanity.log', 'a') { |f| f.puts value }
@@ -657,8 +1122,19 @@ key_name = {
 	'insert'    => 331,
 	'page_down' => 338,
 	'page_up'   => 339,
+	'win_end'   => 358,
 	'end'       => 360,
 	'resize'    => 410,
+	'num_7'     => 449,
+	'num_8'     => 450,
+	'num_9'     => 451,
+	'num_4'     => 452,
+	'num_5'     => 453,
+	'num_6'     => 454,
+	'num_1'     => 455,
+	'num_2'     => 456,
+	'num_3'     => 457,
+	'num_enter' => 459,
 	'ctrl+delete' => 513,
 	'alt+down'    => 517,
 	'ctrl+down'   => 519,
@@ -855,10 +1331,18 @@ load_layout = proc { |layout_id|
 							window.layout = [ e.attributes['height'], e.attributes['width'], e.attributes['top'], e.attributes['left'] ]
 							window.scrollok(true)
 							window.max_buffer_size = e.attributes['buffer-size'] || 1000
+							window.time_stamp = e.attributes['timestamp']
+							window.logger = logger if e.attributes['log']
 							e.attributes['value'].split(',').each { |str|
 								stream_handler[str] = window
 							}
 						end
+					elsif e.attributes['class'] == 'exp'
+						stream_handler['exp'] = ExpWindow.new(height, width - 1, top, left)
+						stream_handler['exp'].logger = logger
+					elsif e.attributes['class'] == 'percWindow'
+						stream_handler['percWindow'] = PercWindow.new(height, width - 1, top, left)
+						stream_handler['percWindow'].logger = logger
 					elsif e.attributes['class'] == 'countdown'
 						if e.attributes['value'] and (window = previous_countdown_handler[e.attributes['value']])
 							previous_countdown_handler[e.attributes['value']] = nil
@@ -1652,7 +2136,7 @@ Thread.new {
 				oc[:start] = 0
 			end
 
-			if current_stream.nil? or stream_handler[current_stream] or (current_stream =~ /^(?:death|logons|thoughts|voln|familiar|assess|ooc|atomospherics)$/)
+			if current_stream.nil? or stream_handler[current_stream] or (current_stream =~ /^(?:death|logons|thoughts|voln|familiar|assess|ooc|shopWindow)$/)
 				SETTINGS_LOCK.synchronize {
 					HIGHLIGHT.each_pair { |regex,colors|
 						pos = 0
@@ -1682,13 +2166,11 @@ Thread.new {
 						if current_stream == 'death'
 							# fixme: has been vaporized!
 							# fixme: ~ off to a rough start
-							if text =~ /^\s\*\s(The death cry of )?([A-Z][a-z]+) (?:just bit the dust!|echoes in your mind!)/
-								front_count = 3
-								front_count += 17 if $1
-								name = $2
+							if text =~ /^\s\*\s([A-Z][a-z]+) (?:was just struck down!|just disintegrated!)/
+								name = $1
 								text = "#{name} #{Time.now.strftime('%l:%M%P').sub(/^0/, '')}"
 								line_colors.each { |h|
-									h[:start] -= front_count
+									h[:start] -= 3
 									h[:end] = [ h[:end], name.length ].min
 								}
 								line_colors.delete_if { |h| h[:start] >= h[:end] }
@@ -1700,7 +2182,7 @@ Thread.new {
 								line_colors.push(h)
 							end
 						elsif current_stream == 'logons'
-							foo = { 'joins the adventure.' => '007700', 'returns home from a hard day of adventuring.' => '777700', 'has disconnected.' => 'aa7733' }
+							foo = { 'joins the adventure with little fanfare.' => '007700', 'just sauntered into the adventure with an annoying tune on his lips.' => '007700', 'just wandered into another adventure.' => '007700', 'just limped in for another adventure.' => '007700', 'snuck out of the shadow he was hiding in.' => '007700', 'joins the adventure with a gleam in her eye.' => '007700', 'joins the adventure with a gleam in his eye.' => '007700', 'comes out from within the shadows with renewed vigor.' => '007700', 'just crawled into the adventure.' => '007700', 'has woken up in search of new ale!' => '007700', 'just popped into existance.' => '007700', 'has joined the adventure after escaping another.' => '007700',  'joins the adventure.' => '007700', 'returns home from a hard day of adventuring.' => '777700', 'has left to contemplate the life of a warrior.' => '777700', 'just sauntered off-duty to get some rest.' => '777700', 'departs from the adventure with little fanfare.' => '777700', 'limped away from the adventure for now.' => '777700', 'thankfully just returned home to work on a new tune.' => '777700', 'fades swiftly into the shadows.' => '777700', 'retires from the adventure for now.' => '777700', 'just found a shadow to hide out in.' => '777700', 'quietly departs the adventure.' => '777700', 'has disconnected.' => 'aa7733' }
 							if text =~ /^\s\*\s([A-Z][a-z]+) (#{foo.keys.join('|')})/
 								name = $1
 								logon_type = $2
@@ -1717,12 +2199,16 @@ Thread.new {
 								}
 								line_colors.push(h)
 							end
+						elsif current_stream == 'exp'
+							window = stream_handler['exp']
+						elsif current_stream == 'percWindow'
+							window = stream_handler['percWindow']
 						end
 						unless text =~ /^\[server\]: "(?:kill|connect)/
 							window.add_string(text, line_colors)
 							need_update = true
 						end
-					elsif current_stream =~ /^(?:death|logons|thoughts|voln|familiar|assess|ooc|atmospherics)$/
+					elsif current_stream =~ /^(?:death|logons|thoughts|voln|familiar|assess|ooc|shopWindow)$/
 						if window = stream_handler['main']
 							if PRESET[current_stream]
 								line_colors.push(:start => 0, :fg => PRESET[current_stream][0], :bg => PRESET[current_stream][1], :end => text.length)
@@ -1850,14 +2336,9 @@ Thread.new {
 								end
 							end
 						end
-					elsif xml =~ /^<progressBar id='encumlevel' value='([0-9]+)' text='(.*?)'/
-						if window = progress_handler['encumbrance']
-							if $2 == 'Overloaded'
-								value = 110
-							else
-								value = $1.to_i
-							end
-							if window.update(value, 110)
+					elsif xml =~/^<progressBar id='(.*?)' value='[0-9]+' text='.* ([0-9]+)%/
+						if window = progress_handler[$1]
+							if window.update($2.to_i, 100)
 								need_update = true
 							end
 						end
@@ -1875,12 +2356,6 @@ Thread.new {
 								value = $1.to_i
 							end
 							if window.update(value, 110)
-								need_update = true
-							end
-						end
-					elsif xml =~ /^<progressBar id='(.*?)' value='[0-9]+' text='.*?\s+(\-?[0-9]+)\/([0-9]+)'/
-						if window = progress_handler[$1]
-							if window.update($2.to_i, $3.to_i)
 								need_update = true
 							end
 						end
@@ -1943,12 +2418,23 @@ Thread.new {
 						end
 					elsif xml =~ /^<(?:pushStream|component) id=("|')(.*?)\1[^>]*\/?>$/
 						new_stream = $2
+						if new_stream =~ /^exp (\w+)/
+							current_stream = 'exp'
+							stream_handler['exp'].set_current($1) if stream_handler['exp']
+						elsif new_stream =~ /^percWindow/
+							current_stream = 'percWindow'
+							stream_handler['percWindow'].clear_spells if stream_handler['percWindow']
+						else 
+							current_stream = new_stream
+						end
 						game_text = line.slice!(0, start_pos)
 						handle_game_text.call(game_text)
-						current_stream = new_stream
 					elsif xml =~ /^<popStream/ or xml == '</component>'
 						game_text = line.slice!(0, start_pos)
 						handle_game_text.call(game_text)
+						if current_stream == 'exp' and stream_handler['exp']
+							stream_handler['exp'].delete_skill
+						end
 						current_stream = nil
 					elsif xml =~ /^<progressBar/
 						nil
@@ -2046,4 +2532,5 @@ rescue
 ensure
 	server.close rescue()
 	Curses.close_screen
+
 end
