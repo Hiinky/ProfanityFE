@@ -1,13 +1,13 @@
 <settings>
-	<!--Windows terminal color codes '000000', '800000', '008000', '808000', '000080', '800080', '008080', 'c0c0c0', '808080', 'ff0000', '00ff00', 'ffff00', '0000ff', 'ff00ff', '00ffff', 'ffffff',-->
-	<highlight fg='ffffff'>^(?:You gesture|You intone a phrase of elemental power|You recite a series of mystical phrases|You trace a series of glowing runes|Your hands glow with power as you invoke|You trace a simple rune while intoning|You trace a sign while petitioning the spirits|You trace an intricate sign that contorts in the air).*$</highlight>
-	<highlight fg='808000'>^.*remaining\. \]$</highlight>
-	<highlight fg='ffffff'>([A-Z][a-z]+ disk)</highlight>
-	<highlight fg='c0c0c0'>^\[.*?\](?:>|&gt;).*$</highlight>
-	<highlight fg='c0c0c0'>\([0-9][0-9]\:[0-9][0-9]\:[0-9][0-9]\)$</highlight>
-	<highlight fg='008000'>^\[code\]</highlight>
-	<highlight fg='808000'>^\[Shattered\]</highlight>
-	<highlight fg='008000'>^--- Lich:.*</highlight>
+    <!--Windows terminal color codes '000000', '800000', '008000', '808000', '000080', '800080', '008080', 'c0c0c0', '808080', 'ff0000', '00ff00', 'ffff00', '0000ff', 'ff00ff', '00ffff', 'ffffff',-->
+    <highlight fg='ffffff'>^(?:You gesture|You intone a phrase of elemental power|You recite a series of mystical phrases|You trace a series of glowing runes|Your hands glow with power as you invoke|You trace a simple rune while intoning|You trace a sign while petitioning the spirits|You trace an intricate sign that contorts in the air).*$</highlight>
+    <highlight fg='808000'>^.*remaining\. \]$</highlight>
+    <highlight fg='ffffff'>([A-Z][a-z]+ disk)</highlight>
+    <highlight fg='c0c0c0'>^\[.*?\](?:>|&gt;).*$</highlight>
+    <highlight fg='c0c0c0'>\([0-9][0-9]\:[0-9][0-9]\:[0-9][0-9]\)$</highlight>
+    <highlight fg='008000'>^\[code\]</highlight>
+    <highlight fg='808000'>^\[Shattered\]</highlight>
+    <highlight fg='008000'>^--- Lich:.*</highlight>
     <highlight fg='00ff00'>^\[combat-trainer\]</highlight>
     <highlight fg='00ff00'>^\[hbot-training\]</highlight>
     <highlight fg='00ff00'>^\[crossing-repair\]</highlight>
@@ -51,57 +51,57 @@
     <highlight fg='00ff00'>^\[healme\]</highlight>
     <highlight fg='00ff00'>^\[summon-admitt\]</highlight>
 
-	<highlight fg='ff00ff'>\((?:calmed|dead|flying|hiding|kneeling|prone|sitting|sleeping|stunned)\)</highlight>
-	<highlight fg='ff00ff'>^.* throws (?:his|her) arms skyward!$|swirling black void|(?:Dozens of flaming meteors light the sky nearby!|Several flaming meteors light the nearby sky!|Several flaming rocks burst from the sky and smite the area!|A low roar of quickly parting air can be heard above!)</highlight>
-	<highlight fg='ff00ff'>^.*(?:falls slack against the floor|falls slack against the ground|falls to the floor, motionless|falls to the ground dead|falls to the ground motionless|and dies|and lies still|goes still|going still)\.$</highlight>
-	<highlight fg='ff00ff'>^.* is stunned!$|^You come out of hiding\.$</highlight>
-	<highlight fg='ff00ff'>.*ruining your hiding place\.$|^You are no longer hidden\.$|^\s*You are (?:stunned|knocked to the ground).*|^You are unable to remain hidden!$|^You are visible again\.$|^You fade into sight\.$|^You fade into view.*|^You feel drained!$|^You have overextended yourself!$|^You feel yourself going into shock!$</highlight>
+    <highlight fg='ff00ff'>\((?:calmed|dead|flying|hiding|kneeling|prone|sitting|sleeping|stunned)\)</highlight>
+    <highlight fg='ff00ff'>^.* throws (?:his|her) arms skyward!$|swirling black void|(?:Dozens of flaming meteors light the sky nearby!|Several flaming meteors light the nearby sky!|Several flaming rocks burst from the sky and smite the area!|A low roar of quickly parting air can be heard above!)</highlight>
+    <highlight fg='ff00ff'>^.*(?:falls slack against the floor|falls slack against the ground|falls to the floor, motionless|falls to the ground dead|falls to the ground motionless|and dies|and lies still|goes still|going still)\.$</highlight>
+    <highlight fg='ff00ff'>^.* is stunned!$|^You come out of hiding\.$</highlight>
+    <highlight fg='ff00ff'>.*ruining your hiding place\.$|^You are no longer hidden\.$|^\s*You are (?:stunned|knocked to the ground).*|^You are unable to remain hidden!$|^You are visible again\.$|^You fade into sight\.$|^You fade into view.*|^You feel drained!$|^You have overextended yourself!$|^You feel yourself going into shock!$</highlight>
 
-	<preset id='whisper' fg='00ffff'/>
-	<preset id='speech' fg='00ffff'/>
-	<preset id='roomName' fg='ffff00'/>
-	<preset id='monsterbold' fg='ffff00'/>
-	<preset id='familiar' bg='00001a'/>
-	<preset id='thoughts' bg='000000'/>
-	<preset id='voln' bg='001a00'/>
-	<key id='alt'>
-		<key id='f' macro='something'/>
-	</key>
-	<key id='enter' action='send_command'/>
-	<key id='left' action='cursor_left'/>
-	<key id='right' action='cursor_right'/>
-	<key id='ctrl+left' action='cursor_word_left'/>
-	<key id='ctrl+right' action='cursor_word_right'/>
-	<key id='home' action='cursor_home'/>
-	<key id='end' action='cursor_end'/>
-	<key id='backspace' action='cursor_backspace'/>
-	<key id='win_backspace' action='cursor_backspace'/>
-	<key id='ctrl+?' action='cursor_backspace'/>
-	<key id='delete' action='cursor_delete'/>
-	<key id='tab' action='switch_current_window'/>
-	<key id='alt+page_up' action='scroll_current_window_up_one'/>
-	<key id='alt+page_down' action='scroll_current_window_down_one'/>
-	<key id='page_up' action='scroll_current_window_up_page'/>
-	<key id='page_down' action='scroll_current_window_down_page'/>
-	<key id='up' action='previous_command'/>
-	<key id='down' action='next_command'/>
-	<key id='ctrl+up' action='send_last_command'/>
-	<key id='alt+up' action='send_second_last_command'/>
-	<key id='resize' action='resize'/>
-	<key id='ctrl+d' macro='\xstance defensive\r'/>
-	<key id='ctrl+o' macro='\xstance offensive\r'/>
-	<key id='ctrl+g' macro='\xremove my buckler\r'/>
-	<key id='ctrl+p' macro='\xwear my buckler\r'/>
-	<key id='ctrl+f' macro='\xtell familiar to '/>
+    <preset id='whisper' fg='00ffff'/>
+    <preset id='speech' fg='00ffff'/>
+    <preset id='roomName' fg='ffff00'/>
+    <preset id='monsterbold' fg='ffff00'/>
+    <preset id='familiar' bg='00001a'/>
+    <preset id='thoughts' bg='000000'/>
+    <preset id='voln' bg='001a00'/>
+    <key id='alt'>
+        <key id='f' macro='something'/>
+    </key>
+    <key id='enter' action='send_command'/>
+    <key id='left' action='cursor_left'/>
+    <key id='right' action='cursor_right'/>
+    <key id='ctrl+left' action='cursor_word_left'/>
+    <key id='ctrl+right' action='cursor_word_right'/>
+    <key id='home' action='cursor_home'/>
+    <key id='end' action='cursor_end'/>
+    <key id='backspace' action='cursor_backspace'/>
+    <key id='win_backspace' action='cursor_backspace'/>
+    <key id='ctrl+?' action='cursor_backspace'/>
+    <key id='delete' action='cursor_delete'/>
+    <key id='tab' action='switch_current_window'/>
+    <key id='alt+page_up' action='scroll_current_window_up_one'/>
+    <key id='alt+page_down' action='scroll_current_window_down_one'/>
+    <key id='page_up' action='scroll_current_window_up_page'/>
+    <key id='page_down' action='scroll_current_window_down_page'/>
+    <key id='up' action='previous_command'/>
+    <key id='down' action='next_command'/>
+    <key id='ctrl+up' action='send_last_command'/>
+    <key id='alt+up' action='send_second_last_command'/>
+    <key id='resize' action='resize'/>
+    <key id='ctrl+d' macro='\xstance defensive\r'/>
+    <key id='ctrl+o' macro='\xstance offensive\r'/>
+    <key id='ctrl+g' macro='\xremove my buckler\r'/>
+    <key id='ctrl+p' macro='\xwear my buckler\r'/>
+    <key id='ctrl+f' macro='\xtell familiar to '/>
 
-	<!-- WEAPONS -->
+    <!-- WEAPONS -->
     <highlight fg='00ffff'>[^\w]axe</highlight>
     <highlight fg='00ffff'>[^\w]maul</highlight>
     <highlight fg='00ffff'>[^\w]greataxe</highlight>
-	<highlight fg='00ffff'>[^\w]bow</highlight>
-	<highlight fg='00ffff'>[^\w]crossbow</highlight>
-	<highlight fg='00ffff'>[^\w]longbow</highlight>
-	<highlight fg='00ffff'>[^\w]shortbow</highlight>
+    <highlight fg='00ffff'>[^\w]bow</highlight>
+    <highlight fg='00ffff'>[^\w]crossbow</highlight>
+    <highlight fg='00ffff'>[^\w]longbow</highlight>
+    <highlight fg='00ffff'>[^\w]shortbow</highlight>
     <highlight fg='00ffff'>[^\w]allarh</highlight>
     <highlight fg='00ffff'>[^\w]cutlass</highlight>
     <highlight fg='00ffff'>[^\w]hammer</highlight>
@@ -116,8 +116,8 @@
     <highlight fg='00ffff'>[^\w]spear</highlight>
     <highlight fg='00ffff'>[^\w]blade</highlight>
 
-	<!-- BOXES -->
-	<highlight fg='808000'>[^\w]box</highlight>
+    <!-- BOXES -->
+    <highlight fg='808000'>[^\w]box</highlight>
     <highlight fg='808000'>[^\w]caddy</highlight>
     <highlight fg='808000'>[^\w]crate</highlight>
     <highlight fg='808000'>[^\w]trunk</highlight>
@@ -156,11 +156,11 @@
     <highlight fg='ff00ff'>[^\w]warrior</highlight>
 
     <!-- MISC -->
-	<highlight fg='008080'>^\[DRPrime\]</highlight>
-	<highlight fg='008080'>^\[LichNet\]</highlight>
-	<highlight fg='008080'>^\[Private(?:To)?\]</highlight>
-	<highlight fg='ffffff'>[^\w]you </highlight>
-	<highlight fg='ffffff'>[^\w]your </highlight>
+    <highlight fg='008080'>^\[DRPrime\]</highlight>
+    <highlight fg='008080'>^\[LichNet\]</highlight>
+    <highlight fg='008080'>^\[Private(?:To)?\]</highlight>
+    <highlight fg='ffffff'>[^\w]you </highlight>
+    <highlight fg='ffffff'>[^\w]your </highlight>
     <highlight fg='ffffff'>[^\w]You </highlight>
     <highlight fg='ffffff'>[^\w]Your </highlight>
     <highlight fg='ffffff'>[^\w]^You </highlight>
@@ -172,13 +172,13 @@
     <highlight fg='00ffff'>^The frosty vapor surrounding you coalesces.*</highlight>
     <highlight fg='00ffff'>^An icy blade circling you.*</highlight>
     <highlight fg='00ffff'>^A blazing flame-like droplet.*</highlight>
-	<highlight fg='808000'>^Roundtime.*</highlight>
-	<highlight fg='808000'>^\[Roundtime.*</highlight>
-	<highlight fg='008080'>^Obvious (exit|path).*</highlight>
-	<highlight fg='00ffff'>You also see .*</highlight>
-	<highlight fg='00ffff'>^Also here:.*</highlight>
-	<highlight fg='800000'>which appears dead</highlight>
-	<highlight fg='808000'>^(?:Cast Roundtime 3 Seconds\.|Your spell is ready\.|Your targeting pattern\.)$</highlight>
+    <highlight fg='808000'>^Roundtime.*</highlight>
+    <highlight fg='808000'>^\[Roundtime.*</highlight>
+    <highlight fg='008080'>^Obvious (exit|path).*</highlight>
+    <highlight fg='00ffff'>You also see .*</highlight>
+    <highlight fg='00ffff'>^Also here:.*</highlight>
+    <highlight fg='800000'>which appears dead</highlight>
+    <highlight fg='808000'>^(?:Cast Roundtime 3 Seconds\.|Your spell is ready\.|Your targeting pattern\.)$</highlight>
 
     <highlight fg='ffffff'>[^\w]shard</highlight>
     <highlight fg='ffffff'>[^\w]arrow</highlight>
@@ -230,7 +230,7 @@
     <layout id='default'>  
       <window class='text' top='11' left='0' width='cols-26' height='lines-13' value='main' buffer-size='2000' log='true' bg='290055'/>
       <window class='exp' top='11' left='cols-26' width='30' height='lines-35' value='exp' buffer-size='2000' log='true' bg='290055'/>
-      <window class='percWindow' top='lines-20' left='cols-26' width='30' height='20' value='percWindow' buffer-size='2000' log='true' bg='290055'/>
+      <window class='percWindow' top='lines-20' left='cols-26' width='30' height='18' value='percWindow' buffer-size='2000' log='true' bg='290055'/>
       <window class='text' top='0' left='0' height='10' width='cols/3*2' value='lnet,thoughts,voln' buffer-size='1000' log='true' bg='290055'/>
         <window class='text' top='0' left='cols/3*2' height='10' width='cols/3-5' value='talk,whispers' buffer-size='1000' bg='290055'/>
 
